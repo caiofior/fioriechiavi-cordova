@@ -1,0 +1,33 @@
+{
+  "name": "cryptojs-md5",
+  "main": "cryptojs-md5.js",
+  "homepage": "https://github.com/damasio34/cryptojs-md5",
+  "description": "Pacote da biblioteca CryptoJs#MD5 (https://code.google.com/p/crypto-js/#MD5).",
+  "moduleType": [],
+  "keywords": [
+    "cryptojs",
+    "md5"
+  ],
+  "authors": [
+    "Darlan Damasio <darlan@damasio34.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "version": "1.0.0",
+  "_release": "1.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.0",
+    "commit": "a23c107ca3bc276bcca11a28075fa236a76a1177"
+  },
+  "_source": "https://github.com/damasio34/cryptojs-md5.git",
+  "_target": "^1.0.0",
+  "_originalSource": "cryptojs-md5",
+  "_direct": true
+}
