@@ -33,7 +33,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        
+        app.receivedEvent('deviceready');
         function getQueryParams(qs) {
             var params = {},
             tokens,
@@ -47,10 +47,6 @@ var app = {
             return params;
         }
         
-        
-        
-        
-        app.receivedEvent('deviceready');
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
             searchText = '';
@@ -61,23 +57,32 @@ var app = {
             
             pathToFile = cordova.file.applicationDirectory + "/db/search/"+searchText.substr(0,1)+"/"+searchText.substr(1,1)+"/"+searchText+".json";
             
-            try{
             window.resolveLocalFileSystemURL(pathToFile, function(fileEntry) {
+                console.log(fileEntry);
                 fileEntry.file(function(file) {
                     reader = new FileReader();
                     reader.onloadend = function(e) {
-                        search = $.parseJSON(this.result)
-                        $.each(search, function(id,taxa){
-                            $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.id+"'>"+taxa.taxa_kind_initials+" "+taxa.name+"</a></p>");
-                        })
+                        
+                            console.log(e);        
+                        if(e.target.result == null) {
+                            $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
+                         } else {
+                             search = $.parseJSON(this.result)
+                            $.each(search, function(id,taxa){
+                                $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.id+"'>"+taxa.taxa_kind_initials+" "+taxa.name+"</a></p>");
+                            })
+                         }
+                        
+                        
+                        
+                        
                     }
                     reader.readAsText(file);
                 });
-            }, function(e){});
-            } catch (e) {
-                $("#mainContent").append("<p>la ricerca non ha prodotto alcun risultato.</p>");
-                console.log(pathToFile);    
-            }
+            }, function(e){
+                $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
+            });
+            
             
             
         }, function(e){

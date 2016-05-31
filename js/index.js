@@ -33,6 +33,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+        app.receivedEvent('deviceready');
         
         function getQueryParams(qs) {
             var params = {},
@@ -62,8 +63,6 @@ var app = {
             'Dicembre':12
         }
         
-        
-        app.receivedEvent('deviceready');
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
             taxaId = 1;
@@ -78,12 +77,12 @@ var app = {
                 fileEntry.file(function(file) {
                     reader = new FileReader();
                     reader.onloadend = function(e) {
-                        taxa = $.parseJSON(this.result)
-                        if (taxa.parent_taxa_id && taxa.parent_taxa_id != '') {
+                        taxa = $.parseJSON(this.result);
+                        if (taxa.parent_taxa_id != null) {
                             $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.parent_taxa_id+"'>"+taxa.parent_taxa_initials+" "+taxa.parent_taxa_name+"</h2></p>");    
-                        }
-                        $("#mainContent").append("<h2>"+taxa.taxa_kind_initials+" "+taxa.name+"</h2>");
-                        $("#mainContent").append("<a href='signalObservation.html'>Segnala osservazione</a>");
+                            $("#mainContent").append("<h2>"+taxa.taxa_kind_initials+" "+taxa.name+"</h2>");
+                        }                        
+                        $("#mainContent").append("<a data-ajax='false' href='signalObservation.html?id="+taxa.id+"'>Segnala osservazione</a>");
                         
                         
                         $("#mainContent").append("<p>"+taxa.description+"</p>");
