@@ -34,6 +34,7 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
+        
         function getQueryParams(qs) {
             var params = {},
             tokens,
@@ -49,43 +50,21 @@ var app = {
         
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
-            searchText = '';
-            queryParams = getQueryParams(location.search);
-            if (queryParams.search) {
-                searchText = queryParams.search.toLowerCase().trim().split(' ')[0];    
-            }
+            profilePath = cordova.file.dataDirectory + "/profile.json";
             
-            pathToFile = cordova.file.applicationDirectory + "/db/search/"+searchText.substr(0,1)+"/"+searchText.substr(1,1)+"/"+searchText+".json";
-            
-            $.ajax({
-            url:pathToFile,
+             $.ajax({
+            url:profilePath,
             type:'HEAD',
             error: function()
             {
-                $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
+                $("#profileForm").show();
             },
             success: function()
             {
-                window.resolveLocalFileSystemURL(pathToFile, function(fileEntry) {
-                    fileEntry.file(function(file) {
-                        reader = new FileReader();
-                        reader.onloadend = function(e) {
-                            if(e.target.result == null) {
-                                $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
-                             } else {
-                                 search = $.parseJSON(this.result)
-                                $.each(search, function(id,taxa){
-                                    $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.id+"'>"+taxa.taxa_kind_initials+" "+taxa.name+"</a></p>");
-                                })
-                             }                        
-                        }
-                        reader.readAsText(file);
-                    });
-                }, function(e){
-                    $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
-                });
+                $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
             }
             });
+    
         }, function(e){
             console.log("Error on file system");
             console.log(e);

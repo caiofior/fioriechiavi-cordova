@@ -65,6 +65,21 @@ var app = {
         
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
+            profilePath = cordova.file.dataDirectory + "/profile.json";
+            
+             $.ajax({
+            url:profilePath,
+            type:'HEAD',
+            error: function()
+            {
+                $("#mainContent").append("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
+            },
+            success: function()
+            {
+
+            }
+            });
+            
             taxaId = 1;
             queryParams = getQueryParams(location.search);
             if (queryParams.id) {
@@ -81,9 +96,13 @@ var app = {
                         if (taxa.parent_taxa_id != null) {
                             $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.parent_taxa_id+"'>"+taxa.parent_taxa_initials+" "+taxa.parent_taxa_name+"</h2></p>");    
                             $("#mainContent").append("<h2>"+taxa.taxa_kind_initials+" "+taxa.name+"</h2>");
-                        }                        
-                        $("#mainContent").append("<a data-ajax='false' href='signalObservation.html?id="+taxa.id+"'>Segnala osservazione</a>");
-                        
+                        }        
+                        if (
+                                taxa.taxa_kind_initials == "Sp." || 
+                                taxa.taxa_kind_initials == "Gen."
+                            ) {
+                                $("#mainContent").append("<p><a data-ajax='false' href='signalObservation.html?id="+taxa.id+"'>Segnala osservazione</a></p>");
+                        }
                         
                         $("#mainContent").append("<p>"+taxa.description+"</p>");
                         $.each(taxa.image, function(id,image){

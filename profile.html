@@ -16,7 +16,7 @@
 				overflow: visible !important;
 		}
 		</style>
-        <title>Segnala osservazione</title>
+        <title>Profilo</title>
     </head>
     <body>
         <div class="app">
@@ -24,26 +24,17 @@
             <div id="deviceready">
                 <div class="event listening">Avvio</div>
                 <div class="event received" id="mainContent">
-                    <form action="index.html" method="post">
-                        <div id="errorPosition"></div>
-                        <input type="hidden" name="taxa_id" id="taxa_id"/>
-                        <input type="hidden" name="latitude" id="latitude"/>
-                        <input type="hidden" name="longitude" id="longitude"/>
+                    <form id="profileForm" action="profile.html" style="display:none;" method="post">
+                        <div id="error"></div>
                         <div>
-                            <label for="title">Titolo</label>
-                            <input id="title" name="title" />
+                            <label for="username">Email/Utente</label>
+                            <input type="email" id="username" name="username" />
                         </div>
                         <div>
-                            <label for="description">Testo</label>
-                            <textarea id="description" name="description" cols="30" rows="10"></textarea>
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" />
                         </div>
-                        <a id="addPhoto" href="#">Aggiungi foto</a>
-                        <div id="errorImage"></div>
-                        <div>
-                            <label for="image">Immagine: </label>
-                            <input name="image" id="image"/>
-                            <img id="imagePreview"/>
-                        </div>
+                        <input type="submit" name="submit" value="Invia"/>
                     </form>
                 </div>
             </div>
@@ -59,6 +50,6 @@
 		});
 		</script>
         <script type="text/javascript" src="js/jquery-1.5.0.mobile.min.js"></script>
-        <script type="text/javascript" src="js/signalObservation.js"></script>
+        <script type="text/javascript" src="js/profile.js"></script>
     </body>
 </html>
