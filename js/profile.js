@@ -17,23 +17,10 @@
  * under the License.
  */
 var app = {
-    // Application Constructor
     initialize: function() {
-        this.bindEvents();
-    },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        document.addEventListener('deviceready', function() {
+        $('.listening').hide();
+        $('.received').show();
         
         function getQueryParams(qs) {
             var params = {},
@@ -47,41 +34,76 @@ var app = {
 
             return params;
         }
-        
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
-            
-            profilePath = cordova.file.dataDirectory + "/profile.json";
-            
-             $.ajax({
-            url:profilePath,
-            type:'HEAD',
-            error: function()
-            {
-                $("#profileForm").show();
-            },
-            success: function()
-            {
-                $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
-            }
+        queryParams = getQueryParams(location.search);
+        if (queryParams.logout) {
+             window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                    dir.getFile("profile.json", {create:false}, function(file) {
+                        file.remove(function(){console.log("Profile removed")});
+                    });
+                });
             });
-    
-        }, function(e){
-            console.log("Error on file system");
-            console.log(e);
-        });
-        
-        
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+        }
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                dir.getFile("profile.json", {create:false}, function() {
+                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+                }, function() {
+                    $("#profileForm").show();
+                    $("#profileForm").submit(function (e) {
+                        e.preventDefault();
+                        if (
+                                $("#username").val() == '' ||
+                                $("#password").val() == ''
+                        ) {
+                            $("#error").text("Utente o password errate");
+                            return;
+                        }
+                        $("#error").text("");
+                        $.support.cors = true;
+                        $.ajax({
+                            url : 'http://127.0.0.1/~caiofior/fioriechiavi.it/xhr.php?task=user&action=login',
+                            data : $("#profileForm").serializeArray(),
+                            crossDomain: true,
+                            dataType : "jsonp",
+                            success : function (data) {
+                                if (data.valid === false) {
+                                    $("#error").text("Utente o password errata");
+                                    return;
+                                }
+                                dir.getFile("profile.json", {create:true}, function(file) {
+                                file.createWriter(function (fileWriter) {
+                                    fileWriter.onwriteend = function() {
+                                        file.file(function (file) {
+                                            var reader = new FileReader();
+                                            reader.onloadend = function(evt) {
+                                                console.log("Read as data URL");
+                                                console.log(evt.target.result);
+                                            };
+                                            console.log(file);
+                                            reader.readAsText(file);
+                                        })
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-       
-        
+                                    };
+                                    fileWriter.onerror = function (e) {
+                                        console.log("Failed file read: " + e.toString());
+                                    };
+                                    console.log(JSON.stringify(data));
+                                    fileWriter.write(JSON.stringify(data));
+                                    });
+                                });
+                            },
+                            error : function (jqXHR , textStatus, errorThrown ) {
+                                console.log(jqXHR );
+                                console.log(textStatus+" "+errorThrown);
+                                $("#error").text("C'è stato un'errore, riprova tra qualche momento");
+                            }
+                        });
+                    });
+                });
+            });
+        });   
     }
+    ,false)}
 };
 app.initialize();

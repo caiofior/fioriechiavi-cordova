@@ -17,23 +17,10 @@
  * under the License.
  */
 var app = {
-    // Application Constructor
     initialize: function() {
-        this.bindEvents();
-    },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        document.addEventListener('deviceready', function() {
+        $('.listening').hide();
+        $('.received').show();
         
         function getQueryParams(qs) {
             var params = {},
@@ -48,43 +35,60 @@ var app = {
             return params;
         }
         
-        floweringNames={
-            'Gennaio':1,
-            'Febbraio':2,
-            'Marzo':3,
-            'Aprile':4,
-            'Maggio':5,
-            'Giugno':6,
-            'Luglio':7,
-            'Agosto':8,
-            'Settembre':9,
-            'Ottobre':10,
-            'Novembre':11,
-            'Dicembre':12
-        }
-        
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
-            profilePath = cordova.file.dataDirectory + "/profile.json";
             
-             $.ajax({
-            url:profilePath,
-            type:'HEAD',
-            error: function()
-            {
-                $("#mainContent").append("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
-            },
-            success: function()
-            {
-
+            floweringNames={
+                'Gennaio':1,
+                'Febbraio':2,
+                'Marzo':3,
+                'Aprile':4,
+                'Maggio':5,
+                'Giugno':6,
+                'Luglio':7,
+                'Agosto':8,
+                'Settembre':9,
+                'Ottobre':10,
+                'Novembre':11,
+                'Dicembre':12
             }
-            });
             
             taxaId = 1;
             queryParams = getQueryParams(location.search);
-            if (queryParams.id) {
+            if (queryParams.signal) {
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                    var d = new Date();
+                    dir.getFile("observation_"+String(d.getTime())+".json", {create:true}, function(file) {
+                    file.createWriter(function(fileWriter) {
+                      fileWriter.onwriteend = function() {
+                        console.log('Write completed.');
+                      };
+                      $.ajax({
+                          url:queryParams.image,
+                          async:false,
+                          error : function(jqXHR) {
+                              queryParams['image'] = jqXHR.responseText;
+                              var text = JSON.stringify(queryParams);  
+                              var blob = new Blob([text], {type: 'text/plain'});
+                              fileWriter.write(blob);
+                              taxaId = queryParams.taxa_id;
+                          }
+                      });
+                    });                    
+                    });
+                });
+            } else if (queryParams.id) {
                 taxaId = queryParams.id;    
             }
+            
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                dir.getFile("profile.json", {create:false}, function() {
+                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+                }, function () {
+                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
+                });
+            });
+            
             thousand = parseInt(taxaId/1000);
             pathToFile = cordova.file.applicationDirectory + "/db/taxa/"+thousand+"/"+taxaId+".json";
             
@@ -199,29 +203,11 @@ var app = {
                     }
                     reader.readAsText(file);
                 });
-            }, function(e){
-                console.log("Error on file access");
-                console.log(e);
             });    
             
             
-        }, function(e){
-            console.log("Error on file system");
-            console.log(e);
         });
-        
-        
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-       
-        
     }
+    ,false)}
 };
 app.initialize();
