@@ -83,7 +83,7 @@ var app = {
             
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                 dir.getFile("profile.json", {create:false}, function() {
-                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+                    $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
 
                     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
                         var directoryReader = dirEntry.createReader();
@@ -103,7 +103,7 @@ var app = {
                     
                     
                 }, function () {
-                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
+                    $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
                 });
             });
             

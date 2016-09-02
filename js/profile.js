@@ -44,6 +44,7 @@ var app = {
                 });
             });
         }
+        
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                 dir.getFile("profile.json", {create:false}, function() {
@@ -60,13 +61,22 @@ var app = {
                             return;
                         }
                         $("#error").text("");
+                        
                         $.support.cors = true;
+                        $.ajaxSetup( {
+                            xhr: function() {return new window.XMLHttpRequest({mozSystem: true});}
+                        });
+                        try{
+                            console.log(baseUrl+'xhr.php?task=user&action=login');
+                            console.log($("#profileForm").serializeArray());
                         $.ajax({
                             url : baseUrl+'xhr.php?task=user&action=login',
                             data : $("#profileForm").serializeArray(),
                             crossDomain: true,
-                            dataType : "jsonp",
+                            dataType : "json",
+                            type: "get",
                             success : function (data) {
+                                console.log(data);
                                 if (data.valid === false) {
                                     $("#error").text("Utente o password errata");
                                     return;
@@ -95,10 +105,11 @@ var app = {
                             },
                             error : function (jqXHR , textStatus, errorThrown ) {
                                 console.log(jqXHR );
-                                console.log(textStatus+" "+errorThrown);
-                                $("#error").text("C'è stato un'errore, riprova tra qualche momento");
+                                console.log(textStatus+" "+errorThrown);    
                             }
-                        });
+                        }); } catch(e) {
+                            $("#error").text("C'è stato un'errore, riprova tra qualche momento");
+                        }
                     });
                 });
             });
