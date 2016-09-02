@@ -52,6 +52,8 @@ var app = {
             function(position) {
                 $("#latitude").val(position.coords.latitude);
                 $("#longitude").val(position.coords.longitude);
+                var d = new Date();
+                $("#datetime").val(d.toISOString());
                 navigator.camera.getPicture(
                     function (imageData) {
                         $("#preview").attr("src",imageData);

@@ -62,7 +62,7 @@ var app = {
                         $("#error").text("");
                         $.support.cors = true;
                         $.ajax({
-                            url : 'http://127.0.0.1/~caiofior/fioriechiavi.it/xhr.php?task=user&action=login',
+                            url : baseUrl+'xhr.php?task=user&action=login',
                             data : $("#profileForm").serializeArray(),
                             crossDomain: true,
                             dataType : "jsonp",

@@ -84,126 +84,144 @@ var app = {
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                 dir.getFile("profile.json", {create:false}, function() {
                     $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+
+                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
+                        var directoryReader = dirEntry.createReader();
+                        console.log(dirEntry);
+
+                        // Get a list of all the entries in the directory
+                        directoryReader.readEntries(function (entries) {
+                        var i;
+                        for (i=0; i<entries.length; i++) {
+                            console.log('En - ', entries[i]);
+                        }
+                    },function (error){
+                            console.log("Error "+error);
+                        } );
+                    });
+                    
+                    
+                    
                 }, function () {
                     $("#mainContent").append("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
                 });
             });
             
             thousand = parseInt(taxaId/1000);
-            pathToFile = cordova.file.applicationDirectory + "/db/taxa/"+thousand+"/"+taxaId+".json";
             
-            window.resolveLocalFileSystemURL(pathToFile, function(fileEntry) {
-                fileEntry.file(function(file) {
-                    reader = new FileReader();
-                    reader.onloadend = function(e) {
-                        taxa = $.parseJSON(this.result);
+                    
+            try {
+                $.ajax({
+                    url:"db/taxa/"+thousand+"/"+taxaId+".json",
+                    type:'HEAD',
+                    success: function(data,status,xhr)
+                    {
+                        taxa = $.parseJSON(xhr.responseText);
                         if (taxa.parent_taxa_id != null) {
-                            $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.parent_taxa_id+"'>"+taxa.parent_taxa_initials+" "+taxa.parent_taxa_name+"</h2></p>");    
-                            $("#mainContent").append("<h2>"+taxa.taxa_kind_initials+" "+taxa.name+"</h2>");
-                        }        
-                        if (
-                                taxa.taxa_kind_initials == "Sp." || 
-                                taxa.taxa_kind_initials == "Gen."
-                            ) {
-                                $("#mainContent").append("<p><a data-ajax='false' href='signalObservation.html?id="+taxa.id+"'>Segnala osservazione</a></p>");
+                        $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.parent_taxa_id+"'>"+taxa.parent_taxa_initials+" "+taxa.parent_taxa_name+"</h2></p>");    
+                        $("#mainContent").append("<h2>"+taxa.taxa_kind_initials+" "+taxa.name+"</h2>");
+                    }        
+                    if (
+                            taxa.taxa_kind_initials == "Sp." || 
+                            taxa.taxa_kind_initials == "Gen."
+                        ) {
+                            $("#mainContent").append("<p><a data-ajax='false' href='signalObservation.html?id="+taxa.id+"'>Segnala osservazione</a></p>");
+                    }
+
+                    $("#mainContent").append("<p>"+taxa.description+"</p>");
+                    $.each(taxa.image, function(id,image){
+                        $("#mainContent").append("<img src='img/taxa"+image.filename+"'>");
+                    });
+                    altFrom = '';
+                    altTo = '';
+                    flowFrom = '';
+                    flowTo = '';
+                    $.each(taxa.attribute, function(id,attribute){
+                        if (attribute.name == 'Limite altitudinale inferiore') {
+                            altFrom = attribute.value;
                         }
-                        
-                        $("#mainContent").append("<p>"+taxa.description+"</p>");
-                        $.each(taxa.image, function(id,image){
-                            $("#mainContent").append("<img src='img/taxa"+image.filename+"'>");
-                        });
-                        altFrom = '';
-                        altTo = '';
-                        flowFrom = '';
-                        flowTo = '';
-                        $.each(taxa.attribute, function(id,attribute){
-                            if (attribute.name == 'Limite altitudinale inferiore') {
-                                altFrom = attribute.value;
-                            }
-                            if (attribute.name == 'Limite altitudinale superiore') {
-                                altTo = attribute.value;
-                            }
-                            if (attribute.name == 'Inizio fioritura') {
-                                flowFrom = floweringNames[attribute.value];
-                            }
-                            if (attribute.name == 'Fine fioritura') {
-                                flowTo = floweringNames[attribute.value];
-                            }
-                            switch (attribute.name) {
-                                case 'Diffusione' :
-                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ● "+attribute.value+"</p>");
+                        if (attribute.name == 'Limite altitudinale superiore') {
+                            altTo = attribute.value;
+                        }
+                        if (attribute.name == 'Inizio fioritura') {
+                            flowFrom = floweringNames[attribute.value];
+                        }
+                        if (attribute.name == 'Fine fioritura') {
+                            flowTo = floweringNames[attribute.value];
+                        }
+                        switch (attribute.name) {
+                            case 'Diffusione' :
+                                $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ● "+attribute.value+"</p>");
+                                break;
+                            case 'Ciclo riproduttivo' :
+                            switch (attribute.value) {
+                                case 'Annuale':
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ☉ "+attribute.value+"</p>");
                                     break;
-                                case 'Ciclo riproduttivo' :
-                                switch (attribute.value) {
-                                    case 'Annuale':
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ☉ "+attribute.value+"</p>");
-                                        break;
-                                    case 'Biennale':
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ⚇ "+attribute.value+"</p>");
-                                        break;
-                                    default:
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: "+attribute.value+"</p>");
-                                        break;
-                                }
-                                case 'Portamento' :
-                                switch (attribute.value) {
-                                    case 'Pianta perenne erbacea':
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ↓ "+attribute.value+"</p>");
-                                        break;
-                                    case 'Cespuglio':
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ⏉ "+attribute.value+"</p>");
-                                        break;
-                                    case 'Albero':
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ☨ "+attribute.value+"</p>");
-                                        break;
-                                    default:
-                                        $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: "+attribute.value+"</p>");
-                                        break;
-                                }
+                                case 'Biennale':
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ⚇ "+attribute.value+"</p>");
+                                    break;
                                 default:
                                     $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: "+attribute.value+"</p>");
                                     break;
                             }
-                        });
-                        regionSer = '';
-                        $.each(taxa.region, function(id,region){
-                            if (regionSer != '') {
-                                regionSer += '-';
+                            case 'Portamento' :
+                            switch (attribute.value) {
+                                case 'Pianta perenne erbacea':
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ↓ "+attribute.value+"</p>");
+                                    break;
+                                case 'Cespuglio':
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ⏉ "+attribute.value+"</p>");
+                                    break;
+                                case 'Albero':
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: ☨ "+attribute.value+"</p>");
+                                    break;
+                                default:
+                                    $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: "+attribute.value+"</p>");
+                                    break;
                             }
-                            regionSer += region.id;
-                        });
+                            default:
+                                $("#mainContent").append("<p><strong>"+attribute.name+"</strong>: "+attribute.value+"</p>");
+                                break;
+                        }
+                    });
+                    regionSer = '';
+                    $.each(taxa.region, function(id,region){
                         if (regionSer != '') {
-                            $("#mainContent").append("<h3>Diffusione geografica</h3>");
-                            hash = CryptoJS.MD5(regionSer).toString();
-                            $("#mainContent").append("<img src='img/merged_map/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
+                            regionSer += '-';
                         }
-                        if (altFrom != '' && altTo != '' ) {
-                            $("#mainContent").append("<h3>Limiti altitudinali</h3>");
-                            hash = CryptoJS.MD5(altFrom+"-"+altTo).toString();
-                            $("#mainContent").append("<img src='img/merged_altitude/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
-                        }
-                        if (flowFrom != '' && flowTo != '' ) {
-                            $("#mainContent").append("<h3>Fioritura</h3>");
-                            hash = CryptoJS.MD5(flowFrom+"-"+flowTo).toString();
-                            $("#mainContent").append("<img src='img/merged_flower/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
-                        }
-                        
-                        $.each(taxa.dico, function(id,dico){
-                            if (dico.taxa_id) {
-                                if (dico.status == 1) {
-                                    $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+dico.taxa_id+"'>"+dico.text+"<br/>"+dico.taxa_kind_initials+" "+dico.name+"</a></p>");    
-                                } else {
-                                    $("#mainContent").append("<p>"+dico.text+" "+dico.taxa_kind_initials+" "+dico.name+"</p>");    
-                                }
-                            } else {
-                                $("#mainContent").append("<p>"+dico.text+"</p>");    
-                            }
-                        });
-                        
+                        regionSer += region.id;
+                    });
+                    if (regionSer != '') {
+                        $("#mainContent").append("<h3>Diffusione geografica</h3>");
+                        hash = CryptoJS.MD5(regionSer).toString();
+                        $("#mainContent").append("<img src='img/merged_map/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
                     }
-                    reader.readAsText(file);
+                    if (altFrom != '' && altTo != '' ) {
+                        $("#mainContent").append("<h3>Limiti altitudinali</h3>");
+                        hash = CryptoJS.MD5(altFrom+"-"+altTo).toString();
+                        $("#mainContent").append("<img src='img/merged_altitude/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
+                    }
+                    if (flowFrom != '' && flowTo != '' ) {
+                        $("#mainContent").append("<h3>Fioritura</h3>");
+                        hash = CryptoJS.MD5(flowFrom+"-"+flowTo).toString();
+                        $("#mainContent").append("<img src='img/merged_flower/"+hash.substr(0,1)+"/"+hash.substr(1,1)+"/"+hash+".png'>");
+                    }
+
+                    $.each(taxa.dico, function(id,dico){
+                        if (dico.taxa_id) {
+                            if (dico.status == 1) {
+                                $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+dico.taxa_id+"'>"+dico.text+"<br/>"+dico.taxa_kind_initials+" "+dico.name+"</a></p>");    
+                            } else {
+                                $("#mainContent").append("<p>"+dico.text+" "+dico.taxa_kind_initials+" "+dico.name+"</p>");    
+                            }
+                        } else {
+                            $("#mainContent").append("<p>"+dico.text+"</p>");    
+                        }
+                    });
+                    }
                 });
-            });    
+            } catch( e) {};
             
             
         });
