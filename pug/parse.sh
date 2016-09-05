@@ -1,0 +1,1 @@
+pug  --obj "{require:require}" --pretty --out .. *.pug

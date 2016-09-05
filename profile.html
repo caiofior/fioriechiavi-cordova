@@ -1,49 +1,68 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-        <meta content="utf-8" http-equiv="encoding">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://127.0.0.1">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel="stylesheet" type="text/css" href="css/index.css">
-		<link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
-		<style>
-		/* For avoiding title truncation in wp8 */
-		.ui-header .ui-title {
-				overflow: visible !important;
-		}
-		</style>
-        <title>Profilo</title>
-    </head>
-    <body>
-        <div class="app">
-            <h1><a id="taxaReturn" data-ajax="false" href="index.html">Fiori e chiavi</a></h1>
-            <div id="deviceready">
-                <div class="event listening">Avvio</div>
-                <div class="event received" id="mainContent">
-                    <form id="profileForm" action="profile.html" style="display:none;" method="post">
-                        <div id="error"></div>
-                        <div>
-                            <label for="username">Email/Utente</label>
-                            <input type="email" id="username" name="username" />
-                        </div>
-                        <div>
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="password" />
-                        </div>
-                        <input type="submit" name="submit" value="Invia"/>
-                    </form>
-                </div>
+  <head>
+    <meta name="charset" content="utf8">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf8" http-equiv="encoding">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://127.0.0.1;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
+    <style>
+      .ui-header .ui-title {
+                      overflow: visible !important;
+      }
+    </style>
+    <title>Profilo</title>
+  </head>
+  <body>
+    <div class="app">
+      <h1><a data-ajax="false" href="index.html">Florae</a></h1>
+      <div id="deviceready">
+        <div class="event listening">Avvio</div>
+        <div class="event received" id="mainContent">
+          <form id="profileForm" action="profile.html" style="display:none" method="post">
+            <div class="error"></div>
+            <div>
+              <label for="username">Email/Utente</label>
+              <input type="email" id="username" name="username">
             </div>
+            <div>
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password">
+            </div>
+            <input type="submit" name="submit" value="Invia"><a class="recover" href="#">Recupera password</a><a class="register" href="#">Registrati</a>
+          </form>
+          <form id="recoverForm" action="profile.html" style="display:none" method="post">
+            <P>Mail dove verrà inviata la nuova password</P>
+            <div class="error"></div>
+            <div>
+              <label for="username">Email/Utente</label>
+              <input type="email" id="usernameRecover" name="usernameRecover">
+            </div>
+            <input type="submit" name="submit" value="Invia"><a class="profile" href="#">Accedi</a><a class="register" href="#">Registrati</a>
+          </form>
+          <form id="regsiterForm" action="profile.html" style="display:none" method="post">
+            <div class="error"></div>
+            <div>
+              <label for="username">Email/Utente</label>
+              <input type="email" id="username" name="username">
+            </div>
+            <div>
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password">
+            </div>
+            <input type="submit" name="submit" value="Invia"><a class="profile" href="#">Accedi</a><a class="recover" href="#">Recupera password</a>
+          </form>
         </div>
-        <p id="debug"></p>
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/jquery-1.11.1.min.js" id="cordova-jquery"></script>
-        <script type="text/javascript" src="js/jquery-1.5.0.mobile.min.js"></script>
-        <script type="text/javascript" src="js/config.js"></script>
-        <script type="text/javascript" src="js/profile.js"></script>
-    </body>
+      </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js" id="cordova-jquery"></script>
+    <script type="text/javascript" src="js/jquery-1.5.0.mobile.min.js"></script>
+    <script type="text/javascript" src="bower_components/cryptojs-md5/cryptojs-md5.js"></script>
+    <script type="text/javascript" src="js/profile.js"></script>
+  </body>
 </html>

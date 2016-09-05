@@ -1,0 +1,32 @@
+include blocks/config
+doctype html
+html
+    head
+        include blocks/head
+        title Segnala osservazione
+    body
+        .app
+            h1
+                a(data-ajax='false' href='index.html') #{config.Sitename}
+            #deviceready
+                .event.listening Avvio
+                #mainContent.event.received
+                    form(action='index.html',method='get',data-ajax='false')
+                        #errorPosition
+                        input(type='hidden',name='taxa_id',id='taxa_id')
+                        input(type='hidden',name='latitude',id='latitude')
+                        input(type='hidden',name='longitude',id='longitude')
+                        input(type='hidden',name='datetime',id='datetime')
+                        div
+                            label(for='title') Titolo
+                            input(id='title',name='title')
+                        div
+                            label(for='description') Testo
+                            textarea(id='description',name='description',cols='30',rows='10')
+                        a(id='addPhoto',href='#') Aggiungi foto
+                        img(id='preview',src='')
+                        #errorImage
+                        input(type='hidden',name='image',id='image')
+                        input(type='submit',name='signal',value='Segnala')
+        include blocks/foot
+        script(type='text/javascript' src='js/signalObservation.js')

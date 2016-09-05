@@ -1,0 +1,17 @@
+include blocks/config
+doctype html
+html
+    head
+        include blocks/head
+        title Ricerca
+    body
+        .app
+            h1
+                a(data-ajax='false' href='index.html') #{config.Sitename}
+            #deviceready
+                .event.listening Avvio
+                #mainContent.event.received
+                    form(data-ajax='false' action='search.html')
+                        input(type='search' name='search')
+        include blocks/foot
+        script(type='text/javascript' src='js/search.js')
