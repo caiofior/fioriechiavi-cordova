@@ -21,6 +21,7 @@ html
                             input(type="password",id="password",name="password")
                         input(type="submit",name="submit",value="Invia")
                         a(class="recover",href="#") Recupera password
+                        br
                         a(class="register",href="#") Registrati
                     form(id="recoverForm",action="profile.html",style="display:none;",method="post")
                         P Mail dove verrà inviata la nuova password
@@ -30,8 +31,9 @@ html
                             input(type="email",id="usernameRecover",name="usernameRecover")
                         input(type="submit",name="submit",value="Invia")
                         a(class="profile",href="#") Accedi
+                        br
                         a(class="register",href="#") Registrati
-                    form(id="regsiterForm",action="profile.html",style="display:none;",method="post")
+                    form(id="registerForm",action="profile.html",style="display:none;",method="post")
                         .error
                         div
                             label(for="username") Email/Utente
@@ -39,8 +41,12 @@ html
                         div
                             label(for="password") Password
                             input(type="password",id="password",name="password")
+                        div
+                            label(for="passwordr") Ridigita password
+                            input(type="password",id="passwordr",name="passwordr")
                         input(type="submit",name="submit",value="Invia")
                         a(class="profile",href="#") Accedi
+                        br
                         a(class="recover",href="#") Recupera password
         include blocks/foot
         script(type='text/javascript' src='js/profile.js')

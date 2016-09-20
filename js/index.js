@@ -62,33 +62,36 @@ var app = {
             } else if (queryParams.id) {
                 taxaId = queryParams.id;    
             }
-            
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
-                dir.getFile("profile.json", {create:false}, function() {
-                    $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+            if(
+                    device.platform !== "browser" &&
+                    navigator.connection !== Connection.NONE
+                    ) {
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                    dir.getFile("profile.json", {create:false}, function() {
+                        $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
 
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
-                        var directoryReader = dirEntry.createReader();
-                        console.log(dirEntry);
+                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
+                            var directoryReader = dirEntry.createReader();
+                            console.log(dirEntry);
 
-                        // Get a list of all the entries in the directory
-                        directoryReader.readEntries(function (entries) {
-                        var i;
-                        for (i=0; i<entries.length; i++) {
-                            console.log('En - ', entries[i]);
-                        }
-                    },function (error){
-                            console.log("Error "+error);
-                        } );
+                            // Get a list of all the entries in the directory
+                            directoryReader.readEntries(function (entries) {
+                            var i;
+                            for (i=0; i<entries.length; i++) {
+                                console.log('En - ', entries[i]);
+                            }
+                        },function (error){
+                                console.log("Error "+error);
+                            } );
+                        });
+
+
+
+                    }, function () {
+                        $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
                     });
-                    
-                    
-                    
-                }, function () {
-                    $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
                 });
-            });
-            
+            }
             thousand = parseInt(taxaId/1000);
             
                     
