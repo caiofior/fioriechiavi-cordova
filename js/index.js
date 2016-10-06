@@ -20,7 +20,7 @@ var app = {
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             
             
-            floweringNames={
+            var floweringNames={
                 'Gennaio':1,
                 'Febbraio':2,
                 'Marzo':3,
@@ -35,8 +35,8 @@ var app = {
                 'Dicembre':12
             }
             
-            taxaId = 1;
-            queryParams = getQueryParams(location.search);
+            var taxaId = 1;
+            var queryParams = getQueryParams(location.search);
             if (queryParams.signal) {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                     var d = new Date();
@@ -45,17 +45,10 @@ var app = {
                       fileWriter.onwriteend = function() {
                         console.log('Write completed.');
                       };
-                      $.ajax({
-                          url:queryParams.image,
-                          async:false,
-                          error : function(jqXHR) {
-                              queryParams['image'] = jqXHR.responseText;
-                              var text = JSON.stringify(queryParams);  
-                              var blob = new Blob([text], {type: 'text/plain'});
-                              fileWriter.write(blob);
-                              taxaId = queryParams.taxa_id;
-                          }
-                      });
+                      var text = JSON.stringify(queryParams);  
+                      var blob = new Blob([text], {type: 'text/plain'});
+                      fileWriter.write(blob);
+                      taxaId = queryParams.taxa_id;
                     });                    
                     });
                 });
@@ -68,29 +61,49 @@ var app = {
                     ) {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                     dir.getFile("profile.json", {create:false}, function() {
-                        $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
-
+                        var headString = "<p>";
                         window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
                             var directoryReader = dirEntry.createReader();
-                            console.log(dirEntry);
-
-                            // Get a list of all the entries in the directory
                             directoryReader.readEntries(function (entries) {
                             var i;
+                            var c = 0;
+                            var e = /image$/;
                             for (i=0; i<entries.length; i++) {
-                                console.log('En - ', entries[i]);
+                                if (
+                                        entries[i].name !== 'profile.json' &&
+                                        !e.test(entries[i].name)
+                                        ) {
+                                    c++;
+                                }
                             }
+                            if (c > 0) {
+                                headString += "<a data-ajax='false' href='upload.html'>Upload</a> ";
+                            }
+                            headString += "<a class='showNext' href='#'>Logout</a><a style='display:none;' data-ajax='false' href='profile.html?logout=1'><img src='css/ok.png' title='Conferma' alt='conferma'></a></p>";
+                            $("#mainContent").prepend(headString);
+                            $("a.showNext").click(function(e){
+                                $(this).next().show();
+                                e.preventDefault();
+                            });
                         },function (error){
                                 console.log("Error "+error);
                             } );
                         });
-
-
-
                     }, function () {
                         $("#mainContent").prepend("<p><a data-ajax='false' href='profile.html'>Login</a></p>");
                     });
                 });
+            }
+            var config;
+            $.ajax({
+                url:'js/config.json',
+                async:false,
+                complete:function(xhr) {
+                    config = JSON.parse(xhr.responseText);
+                }
+            });
+            if( device.platform === "browser") {   
+                $("#mainContent").prepend("<p><a data-ajax='false' target='_blank' href='"+config.baseUrl+"index.php?id="+taxaId+"'>Aggiornamenti sul sito "+config.Sitename+"</a></p>");
             }
             thousand = parseInt(taxaId/1000);
             

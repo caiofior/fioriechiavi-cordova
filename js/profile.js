@@ -21,7 +21,7 @@ var app = {
              window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                     dir.getFile("profile.json", {create:false}, function(file) {
-                        file.remove(function(){console.log("Profile removed")});
+                        file.remove();
                     });
                 });
             });
@@ -85,26 +85,24 @@ var app = {
                             $(".error").text("Utente o password errata");
                             return;
                         }
-                        dir.getFile("profile.json", {create:true}, function(file) {
-                        file.createWriter(function (fileWriter) {
-                            fileWriter.onwriteend = function() {
-                                file.file(function (file) {
-                                    var reader = new FileReader();
-                                    reader.onloadend = function(evt) {
-                                        console.log("Read as data URL");
-                                        console.log(evt.target.result);
-                                        window.location="index.html";
-                                    };
-                                    console.log(file);
-                                    reader.readAsText(file);
-                                })
+                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                            dir.getFile("profile.json", {create:true}, function(file) {
+                            file.createWriter(function (fileWriter) {
+                                fileWriter.onwriteend = function() {
+                                    file.file(function (file) {
+                                        var reader = new FileReader();
+                                        reader.onloadend = function(evt) {
+                                            window.location="index.html";
+                                        };
+                                        reader.readAsText(file);
+                                    })
 
-                            };
-                            fileWriter.onerror = function (e) {
-                                console.log("Failed file read: " + e.toString());
-                            };
-                            console.log(JSON.stringify(data));
-                            fileWriter.write(JSON.stringify(data));
+                                };
+                                fileWriter.onerror = function (e) {
+                                    console.log("Failed file read: " + e.toString());
+                                };
+                                fileWriter.write(JSON.stringify(data));
+                                });
                             });
                         });
                     },
@@ -200,7 +198,7 @@ var app = {
                 try{
                 $.ajax({
                     url : config.baseUrl+'xhr.php?task=user&action=register',
-                    data : $("#profileForm").serializeArray(),
+                    data : $("#registerForm").serializeArray(),
                     crossDomain: true,
                     dataType : "json",
                     type: "get",
@@ -215,19 +213,14 @@ var app = {
                                 file.file(function (file) {
                                     var reader = new FileReader();
                                     reader.onloadend = function(evt) {
-                                        console.log("Read as data URL");
-                                        console.log(evt.target.result);
                                         window.location="index.html";
                                     };
-                                    console.log(file);
                                     reader.readAsText(file);
                                 })
-
                             };
                             fileWriter.onerror = function (e) {
                                 console.log("Failed file read: " + e.toString());
                             };
-                            console.log(JSON.stringify(data));
                             fileWriter.write(JSON.stringify(data));
                             });
                         });
