@@ -25,17 +25,16 @@ var app = {
         try {
             $.ajax({
                 url:"db/search/"+searchText.substr(0,1)+"/"+searchText.substr(1,1)+"/"+searchText+".json",
-                type:'HEAD',
-                error: function()
+                complete: function(xhr)
                 {
-                    $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");
-                },
-                success: function(data,status,xhr)
-                {
-                    search = $.parseJSON(xhr.responseText);
-                    $.each(search, function(id,taxa){
-                        $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.id+"'>"+taxa.taxa_kind_initials+" "+taxa.name+"</a></p>");
-                    });
+                    if (xhr.responseText == "") {
+                       $("#mainContent").append("<p>La ricerca non ha prodotto alcun risultato.</p>");                    
+                    } else {
+                       search = $.parseJSON(xhr.responseText);
+                       $.each(search, function(id,taxa){
+                           $("#mainContent").append("<p><a data-ajax='false' href='index.html?id="+taxa.id+"'>"+taxa.taxa_kind_initials+" "+taxa.name+"</a></p>");
+                       });
+                    }
                 }
             });
         } catch( e) {}; 

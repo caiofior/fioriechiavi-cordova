@@ -111,8 +111,7 @@ var app = {
             try {
                 $.ajax({
                     url:"db/taxa/"+thousand+"/"+taxaId+".json",
-                    type:'HEAD',
-                    success: function(data,status,xhr)
+                    complete: function(xhr)
                     {
                         taxa = $.parseJSON(xhr.responseText);
                         if (taxa.parent_taxa_id != null) {
