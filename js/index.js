@@ -215,6 +215,9 @@ var app = {
                         } else {
                             $("#mainContent").append("<p>"+dico.text+"</p>");    
                         }
+                        if (dico.photo_path) {
+							$("#mainContent").append("<img src='img/dico/"+photo_path+"'>");
+						}
                     });
                     }
                 });
