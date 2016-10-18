@@ -79,6 +79,10 @@ var app = {
                 }
             });
         });
+        var options =  {maximumAge:600000, timeout:5000, enableHighAccuracy: true}
+        if (device.platform === "firefoxos") {
+			options = {};
+		}
         
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -87,7 +91,6 @@ var app = {
                 navigator.globalization.dateToString(
                     new Date(),
                     function (date) {
-                        console.log(date);
                         $("#datetime").val(date.value);
                     },
                     function (e) {console.log(e);},
@@ -96,46 +99,50 @@ var app = {
                 navigator.camera.getPicture(
                     function (imageData) {
                         $("#preview").attr("src",imageData);
+                        var d = new Date();
+                        var fileName= "observation_"+String(d.getTime())+".image";
+                        if (device.platform === "firefoxos") {
+							var req = new XMLHttpRequest();
+							req.onreadystatechange = function () {
+								if (req.readyState === 4) {
+									req.onreadystatechange = function () {};
+									window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+										dir.getFile(fileName, {create:true}, function(file) {
+											file.createWriter(function(fileWriter) {
+											  fileWriter.onwriteend = function() {
+												$("#image").val(fileName);
+												$("#errorImage").html(fileName);
+											  };
+											  fileWriter.write(req.response);
+											});                    
+										});
+									});
+								}
+							}
+							req.open('GET', imageData, true);
+							req.responseType = 'blob';
+							req.send();
                         
-                        window.resolveLocalFileSystemURL(imageData, function(fileEntry) {
-                            fileEntry.file(function(file) {
-                                console.log(file.type);
-                            }, function(e) {
-                                console.log(e);
-                            });
-
-                        }, function(e) {
-                                console.log(e);
-                        });
+						} else {
+							var ftob = new FileTransfer();
+							ftob.download(imageData, cordova.file.dataDirectory + fileName, 
+								function(fileEntry)
+								{
+									$("#image").val(fileName);
+								},
+								function (error)
+								{
+									$("#errorImage").html("Errore nella copia dell'immagine "+error.code);
+								}
+							);
+						}
                         
-                        
-                        var req = new XMLHttpRequest();
-                        req.onreadystatechange = function () {
-                            if (req.readyState === 4) {
-                                req.onreadystatechange = function () {};
-                                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
-                                    var d = new Date();
-                                    var fileName= "observation_"+String(d.getTime())+".image";
-                                    dir.getFile(fileName, {create:true}, function(file) {
-                                        file.createWriter(function(fileWriter) {
-                                          fileWriter.onwriteend = function() {
-                                            $("#image").val(fileName);  
-                                          };
-                                          fileWriter.write(req.response);
-                                        });                    
-                                    });
-                                });
-                            }
-                        }
-                        req.open('GET', imageData, true);
-                        req.responseType = 'blob';
-                        req.send();
                     }, function (message) {
-                        $("#errorImage").html(message);
+                        $("#errorImage").html("Errore nell'accesso all'immagine "+message);
                     },{destinationType: Camera.DestinationType.FILE_URI});
             }, function(error) {
-                $("#errorPosition").html(error.code+" "+error.message);
-            }
+                $("#errorPosition").html("Non riesco a determinare la posizione<br>"+error.code+" "+error.message);
+            }, options
         );
         
         

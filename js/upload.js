@@ -16,52 +16,52 @@ var app = {
 
             return params;
         }
-        
+        $("#mainContent").append("Ready");
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                 var queryParams = getQueryParams(location.search);
                 
                 if (queryParams.upload_file) {
-                    var config;
                     $.ajax({
                         url:'js/config.json',
-                        async:false,
                         complete:function(xhr) {
-                            config = JSON.parse(xhr.responseText);
+                            var config = JSON.parse(xhr.responseText);
+                            
+                            window.resolveLocalFileSystemURL(cordova.file.dataDirectory+"profile.json", function(fileEntry) {
+							fileEntry.file(function (file) {
+								var reader = new FileReader();
+								reader.onloadend = function () {
+									var profile = JSON.parse(this.result);
+									var ftob = new FileTransfer();
+									ftob.upload(cordova.file.dataDirectory+queryParams.upload_file, encodeURI(config.baseUrl+"xhr.php?task=observation&action=signal&token="+profile.token),function(obIns) {
+										window.resolveLocalFileSystemURL(cordova.file.dataDirectory+queryParams.upload_file, function(fileEntryObs) {
+										fileEntryObs.file(function (fileObs) {
+												var reader = new FileReader();
+												reader.onloadend = function () {
+													var observation = JSON.parse(this.result);
+													console.log(observation);
+													var observationInsert = JSON.parse(obIns.response);
+													if (observation.image !== "") {
+														var ftimg = new FileTransfer();
+														ftimg.upload(cordova.file.dataDirectory+observation.image, encodeURI(config.baseUrl+"xhr.php?task=observation&action=appendimage&token="+profile.token+"&id="+observationInsert.id),
+														function(e) {
+															fileEntryObs.remove();
+														}, function(e) {
+															console.log(e);
+														});
+													}
+												};
+												reader.readAsText(fileObs);
+											});
+										});   
+									});
+								};
+								reader.readAsText(file);
+							});
+						});
+                            
+                            
                         }
-                    });
-                    
-                    
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory+"profile.json", function(fileEntry) {
-                        fileEntry.file(function (file) {
-                            var reader = new FileReader();
-                            reader.onloadend = function () {
-                                var profile = JSON.parse(this.result);
-                                var ftob = new FileTransfer();
-                                ftob.upload(cordova.file.dataDirectory+queryParams.upload_file, encodeURI(config.baseUrl+"xhr.php?task=observation&action=signal&token="+profile.token),function(obIns) {
-                                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory+queryParams.upload_file, function(fileEntryObs) {
-                                    fileEntryObs.file(function (fileObs) {
-                                            var reader = new FileReader();
-                                            reader.onloadend = function () {
-                                                var observation = JSON.parse(this.result);
-                                                var observationInsert = JSON.parse(obIns.response);
-                                                console.log(observationInsert);
-                                                var ftimg = new FileTransfer();
-                                                ftimg.upload(cordova.file.dataDirectory+observation.image, encodeURI(config.baseUrl+"xhr.php?task=observation&action=appendimage&token="+profile.token+"&id="+observationInsert.id),
-                                                function(e) {
-                                                    fileEntryObs.remove();
-                                                }, function(e) {
-                                                    console.log(e);
-                                                });
-                                            };
-                                            console.log(fileObs);
-                                            reader.readAsText(fileObs);
-                                        });
-                                    });   
-                                });
-                            };
-                            reader.readAsText(file);
-                        });
                     });
                 } else if (queryParams.delete_file) {
                     window.resolveLocalFileSystemURL(cordova.file.dataDirectory+queryParams.delete_file, function(fileEntry) {
@@ -69,16 +69,6 @@ var app = {
                     });
                 }
                 dir.getFile("profile.json", {create:false}, function() {
-                    
-                            
-                        
-                        $("a.showNext").on("click",function(e){
-                            console.log("HI");
-                            $(this).next().show();
-                            e.preventDefault();
-                        });     
-
-                    
                         var directoryReader = dir.createReader();
                         directoryReader.readEntries(function (entries) {
                         var i;
@@ -103,16 +93,27 @@ var app = {
                                             });
                                         };
                                         reader.readAsText(file);
-                                    });
-                                });
+                                    }, function (e) {
+										$("#mainContent").append("Error fileEntry "+entries[i].name+e.code)
+									});
+                                }, function (e) {
+									$("#mainContent").append("Error resolve "+entries[i].name+e.code)
+								});
                             };
                         }
 
-                    });
-                });
-            });
-  
-        });
+                    }, function (e) {
+						$("#mainContent").append("Reader not valid "+e.code);
+					});
+                }, function (e) {
+					$("#mainContent").append("Profile not valid "+e.code);
+				});
+            }, function (e) {
+					$("#mainContent").append("Data directory "+e.code);
+			});  
+        }, function (e) {
+				$("#mainContent").append("Local file system "+e.code);
+		});
     }
     ,false)}
 };
