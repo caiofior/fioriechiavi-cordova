@@ -21,39 +21,46 @@ var app = {
              window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
                     dir.getFile("profile.json", {create:false}, function(file) {
-                        file.remove();
+                        file.remove(function (){
+                          window.location="index.html";  
+                        });
                     });
                 });
             });
         }
-        var config;
         $.ajax({
             url:'js/config.json',
-            async:false,
             complete:function(xhr) {
-                config = JSON.parse(xhr.responseText);
-            }
-        });
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
-                dir.getFile("profile.json", {create:false}, function() {
-                    $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
-                }, function() {
-                    profileForm ();
-                    $("a.profile").click(function() {
-                      profileForm ();
-                    });
-                    
-                    $("a.recover").click(function() {
-                      recoverForm ();  
-                    });
-                    $("a.register").click(function() {
-                      registerForm ();
+                var config = JSON.parse(xhr.responseText);
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,  function() {
+                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+                        dir.getFile("profile.json", {create:false}, function() {
+                            $("#mainContent").append("<p><a data-ajax='false' href='profile.html?logout=1'>Logout</a></p>");
+                        }, function() {
+                            var profile = new Profile(config);
+                            profile.profileForm ();
+                            $("a.profile").click(function() {
+                              profile.profileForm ();
+                            });
+                            $("a.recover").click(function() {
+                              profile.recoverForm ();  
+                            });
+                            $("a.register").click(function() {
+                              profile.registerForm ();
+                            });
+                        });
                     });
                 });
-            });
+            }
         });
-        function profileForm () {
+    }
+    ,false)}
+};
+app.initialize();
+function Profile (config) {
+    var self = this;
+    this.config = config;
+    this.profileForm = function  () {
             $("#profileForm").show();
             $("#recoverForm").hide();
             $("#registerForm").hide();
@@ -75,7 +82,7 @@ var app = {
                 });
                 try{
                 $.ajax({
-                    url : config.baseUrl+'xhr.php?task=user&action=login',
+                    url : self.config.baseUrl+'xhr.php?task=user&action=login',
                     data : $("#profileForm").serializeArray(),
                     crossDomain: true,
                     dataType : "json",
@@ -115,7 +122,7 @@ var app = {
                 }
             });
         }
-        function recoverForm () {
+        this.recoverForm = function  () {
             $("#profileForm").hide();
             $("#recoverForm").show();
             $("#registerForm").hide();
@@ -131,7 +138,7 @@ var app = {
                   $(".error").text("");
                   try{
                   $.ajax({
-                      url : config.baseUrl+'xhr.php?task=user&action=recover',
+                      url : self.config.baseUrl+'xhr.php?task=user&action=recover',
                       data : $("#recoverForm").serializeArray(),
                       crossDomain: true,
                       dataType : "json",
@@ -154,7 +161,7 @@ var app = {
                   }
             });
         }
-        function registerForm () {
+        this.registerForm =function  () {
             $("#profileForm").hide();
             $("#recoverForm").hide();
             $("#registerForm").show();
@@ -197,7 +204,7 @@ var app = {
                 });
                 try{
                 $.ajax({
-                    url : config.baseUrl+'xhr.php?task=user&action=register',
+                    url : self.config.baseUrl+'xhr.php?task=user&action=register',
                     data : $("#registerForm").serializeArray(),
                     crossDomain: true,
                     dataType : "json",
@@ -234,7 +241,5 @@ var app = {
                 }
             });
         }
-    }
-    ,false)}
-};
-app.initialize();
+    
+}

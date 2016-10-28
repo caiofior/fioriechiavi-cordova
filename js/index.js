@@ -3,42 +3,19 @@ var app = {
         document.addEventListener('deviceready', function () {
             $('.listening').hide();
             $('.received').show();
-            function getQueryParams(qs) {
-                var params = {},
-                    tokens,
-                    re = /[?&]?([^=]+)=([^&]*)/g;
-                while (tokens = re.exec(qs)) {
-                    params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
-                }
-                return params;
-            }
+            
             window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function () {
 
-                var taxaId = 1,
-                    queryParams = getQueryParams(location.search);
-                if (queryParams.signal) {
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
-                        var d = new Date();
-                        dir.getFile("observation_" + String(d.getTime()) + ".json", {create: true}, function (file) {
-                            file.createWriter(function (fileWriter) {
-                                fileWriter.onwriteend = function () {
-                                    console.log('Write completed.');
-                                };
-                                var text = JSON.stringify(queryParams),
-                                    blob = new Blob([text], {type: 'text/plain'});
-                                fileWriter.write(blob);
-                                taxaId = queryParams.taxa_id;
-                            });
-                        });
-                    });
-                } else if (queryParams.id) {
-                    taxaId = queryParams.id;
+                var taxaId = 1;
+                var renderer = new Renderer(location.search);
+                if (renderer.params.id) {
+                    taxaId = renderer.params.id;
                 }
                 $.ajax({
                     url: 'js/config.json',
                     complete: function (xhr) {
                         config = JSON.parse(xhr.responseText);
-                        var renderer = new Renderer();
+                        
                         renderer.updateMainContent(taxaId);
                     }
                 });
@@ -51,8 +28,15 @@ var app = {
 };
 app.initialize();
 
-function Renderer() {
+function Renderer(qs) {
     var self = this;
+    
+    this.params = {};
+    var tokens;
+    var re = /[?&]?([^=]+)=([^&]*)/g;
+    while (tokens = re.exec(qs)) {
+        self.params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
     this.initialize = function () {
         var el = $("#mainContent").empty().append("<form data-ajax='false' action='#'><input type='search' name='search'></form>");
         el.find("input").textinput();
@@ -103,6 +87,7 @@ function Renderer() {
                             var e = /image$/;
                             for (i = 0; i < entries.length; i++) {
                                 if (
+                                        entries[i].isFile &&
                                         entries[i].name !== 'profile.json' &&
                                         !e.test(entries[i].name)
                                         ) {

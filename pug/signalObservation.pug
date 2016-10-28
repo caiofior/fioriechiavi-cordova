@@ -11,7 +11,7 @@ html
             #deviceready
                 .event.listening Avvio
                 #mainContent.event.received
-                    form(action='index.html',method='get',data-ajax='false')
+                    form(action='index.html',id="signalObservation", method='get',data-ajax='false')
                         #errorPosition
                         input(type='hidden',name='taxa_id',id='taxa_id')
                         input(type='hidden',name='latitude',id='latitude')
@@ -23,7 +23,7 @@ html
                         div
                             label(for='description') Testo
                             textarea(id='description',name='description',cols='30',rows='10')
-                        a(id='addPhoto',href='#') Aggiungi foto
+                        a(id='addPhoto',href='#') Aggiungi foto e posizione
                         img(id='preview',src='css/noimage.png')
                         #errorImage
                         input(type='hidden',name='image',id='image')
