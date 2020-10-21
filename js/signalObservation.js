@@ -55,6 +55,7 @@ var app = {
                 }
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
                     var d = new Date();
+                    var name = String(d.getTime());
                     dir.getFile("observation_" + String(d.getTime()) + ".json", {create: true}, function (file) {
                         file.createWriter(function (fileWriter) {
                             fileWriter.onwriteend = function () {
@@ -89,6 +90,7 @@ function SignalObservation() {
                 var e = /image$/;
                 for (i = 0; i < entries.length; i++) {
                     if (
+                            entries[i].isFile &&
                             entries[i].name !== 'profile.json' &&
                             !e.test(entries[i].name)
                             ) {
@@ -166,6 +168,7 @@ function SignalObservation() {
                                     },
                                     true,
                                     {}
+                                    
                             );
                         }
                     }, function (message) {
